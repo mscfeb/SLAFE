@@ -43,6 +43,7 @@ export function createAppTheme(mode: PaletteMode) {
           body: {
             height: '100%',
             overflow: 'hidden',
+            margin: 0,
           },
           '#root': {
             height: '100%',
@@ -56,6 +57,11 @@ export function createAppTheme(mode: PaletteMode) {
             display: 'none',
             width: 0,
             height: 0,
+          },
+          '@media (max-width:899.95px)': {
+            'html, body, #root': {
+              WebkitOverflowScrolling: 'touch',
+            },
           },
         },
       },

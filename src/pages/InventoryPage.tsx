@@ -26,7 +26,7 @@ import { PageSkeleton } from '@/components/common/PageSkeleton';
 import { PageShell } from '@/components/layout/PageShell';
 import { LENS_TYPE_OPTIONS } from '@/utils/constants';
 import {
-  hideScrollbarSx,
+  tableScrollSx,
   inventoryRowSx,
   inventoryTableCellSx,
   inventoryTableHeadSx,
@@ -163,7 +163,7 @@ export function InventoryPage() {
           </Stack>
         ) : (
           <>
-            <TableContainer sx={{ flex: 1, overflow: 'auto', ...hideScrollbarSx }}>
+            <TableContainer sx={tableScrollSx}>
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>

@@ -26,10 +26,9 @@ import { PageSkeleton } from '@/components/common/PageSkeleton';
 import { PageShell } from '@/components/layout/PageShell';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAuth } from '@/hooks/useAuth';
-import { useGlobalSearch } from '@/components/layout/AppShell';
 import { formatDate, formatHours, riskColor } from '@/utils/formatters';
 import { LENS_TYPE_OPTIONS, ORDER_SOURCE_OPTIONS } from '@/utils/constants';
-import { hideScrollbarSx, panelPaperSx } from '@/utils/scroll';
+import { panelPaperSx, tableScrollSx } from '@/utils/scroll';
 import type { LensType, OrderSource, OrderStatus } from '@/types/api';
 import {
   ALLOWED_TRANSITIONS,
@@ -39,7 +38,7 @@ import {
 export function OrdersPage() {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const { search } = useGlobalSearch();
+  const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -81,6 +80,13 @@ export function OrdersPage() {
       fixedBody
       toolbar={
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+          <TextField
+            size="small"
+            placeholder="Search orders..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ minWidth: { xs: '100%', md: 240 } }}
+          />
           <TextField select label="Status" size="small" value={status} onChange={(e) => setStatus(e.target.value as OrderStatus | '')} sx={{ minWidth: 180 }}>
             <MenuItem value="">All</MenuItem>
             {Object.keys(ALLOWED_TRANSITIONS).map((s) => (
@@ -104,7 +110,7 @@ export function OrdersPage() {
       }
     >
       <Paper sx={panelPaperSx}>
-        <TableContainer sx={{ flex: 1, minHeight: 0, overflow: 'auto', ...hideScrollbarSx }}>
+        <TableContainer sx={tableScrollSx}>
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>

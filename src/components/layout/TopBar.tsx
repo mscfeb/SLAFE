@@ -2,37 +2,28 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  InputBase,
   Box,
   Badge,
   Menu,
   MenuItem,
   Avatar,
   Typography,
-  Tooltip,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
-import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetActiveAlertsQuery } from '@/services/alertsApi';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch } from '@/hooks/useAppStore';
 import { logout } from '@/features/auth/authSlice';
-import { DRAWER_WIDTH } from './Sidebar';
-import { useThemeMode } from '@/app/providers/AppProviders';
+import { ThemeToggle } from '@/components/auth/ThemeToggle';
 
 interface TopBarProps {
   onMenuClick: () => void;
-  search: string;
-  onSearchChange: (value: string) => void;
 }
 
-export function TopBar({ onMenuClick, search, onSearchChange }: TopBarProps) {
-  const { darkMode, toggleTheme } = useThemeMode();
+export function TopBar({ onMenuClick }: TopBarProps) {
   const { user } = useAuth();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -45,46 +36,22 @@ export function TopBar({ onMenuClick, search, onSearchChange }: TopBarProps) {
       color="inherit"
       elevation={0}
       sx={{
-        width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-        ml: { md: `${DRAWER_WIDTH}px` },
+        width: '100%',
         borderBottom: 1,
         borderColor: 'divider',
         bgcolor: 'background.paper',
       }}
     >
-      <Toolbar sx={{ gap: 1 }}>
-        <IconButton edge="start" onClick={onMenuClick} sx={{ display: { md: 'none' } }}>
+      <Toolbar sx={{ gap: 1, justifyContent: 'flex-end' }}>
+        <IconButton
+          edge="start"
+          onClick={onMenuClick}
+          sx={{ display: { md: 'none' }, mr: 'auto' }}
+        >
           <MenuIcon />
         </IconButton>
 
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            bgcolor: 'action.hover',
-            borderRadius: 2,
-            px: 1.5,
-            py: 0.5,
-            flex: 1,
-            maxWidth: 420,
-          }}
-        >
-          <SearchIcon fontSize="small" color="action" />
-          <InputBase
-            placeholder="Search orders..."
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            sx={{ ml: 1, flex: 1, fontSize: 14 }}
-          />
-        </Box>
-
-        <Box sx={{ flex: 1 }} />
-
-        <Tooltip title={darkMode ? 'Light mode' : 'Dark mode'}>
-          <IconButton onClick={toggleTheme}>
-            {darkMode ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
-          </IconButton>
-        </Tooltip>
+        <ThemeToggle />
 
         <IconButton onClick={() => navigate('/alerts')}>
           <Badge badgeContent={alerts?.total ?? 0} color="error">

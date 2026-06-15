@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import type { ReactNode } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
-import { pageRootSx, scrollPanelSx } from '@/utils/scroll';
+import { pageFixedBodySx, pageRootSx, scrollPanelSx } from '@/utils/scroll';
 
 interface PageShellProps {
   title: string;
@@ -40,8 +40,8 @@ export function PageShell({
       <Box
         sx={
           (fixedBody
-            ? [{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }, bodySx]
-            : [scrollPanelSx, bodySx]) as SxProps<Theme>
+            ? [pageFixedBodySx, bodySx]
+            : [scrollPanelSx, { minWidth: 0 }, bodySx]) as SxProps<Theme>
         }
       >
         {children}

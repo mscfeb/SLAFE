@@ -8,6 +8,7 @@ import { PageSkeleton } from '@/components/common/PageSkeleton';
 import { useAuth } from '@/hooks/useAuth';
 
 const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import('@/pages/RegisterPage').then((m) => ({ default: m.RegisterPage })));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
 const OrdersPage = lazy(() => import('@/pages/OrdersPage').then((m) => ({ default: m.OrdersPage })));
 const OrderDetailPage = lazy(() => import('@/pages/OrderDetailPage').then((m) => ({ default: m.OrderDetailPage })));
@@ -16,13 +17,25 @@ const AlertsPage = lazy(() => import('@/pages/AlertsPage').then((m) => ({ defaul
 const AnalyticsPage = lazy(() => import('@/pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })));
 const AiInsightsPage = lazy(() => import('@/pages/AiInsightsPage').then((m) => ({ default: m.AiInsightsPage })));
 
-function LoginRedirect() {
+function GuestRedirect({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  return <Suspense fallback={<PageSkeleton />}>{children}</Suspense>;
+}
+
+function LoginRedirect() {
   return (
-    <Suspense fallback={<PageSkeleton />}>
+    <GuestRedirect>
       <LoginPage />
-    </Suspense>
+    </GuestRedirect>
+  );
+}
+
+function RegisterRedirect() {
+  return (
+    <GuestRedirect>
+      <RegisterPage />
+    </GuestRedirect>
   );
 }
 
@@ -36,6 +49,7 @@ export function AppRouter() {
       <ErrorBoundary>
         <Routes>
           <Route path="/login" element={<LoginRedirect />} />
+          <Route path="/register" element={<RegisterRedirect />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<AppShell />}>
               <Route index element={<Navigate to="/dashboard" replace />} />

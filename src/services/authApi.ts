@@ -1,10 +1,18 @@
 import { api } from './baseApi';
 import { unwrapApi } from './api';
-import type { ApiResponse, LoginRequest, TokenResponse, User } from '@/types/api';
+import type { ApiResponse, LoginRequest, RegisterRequest, TokenResponse, User } from '@/types/api';
 import { setCredentials } from '@/features/auth/authSlice';
 
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
+    register: builder.mutation<User, RegisterRequest>({
+      query: (body) => ({
+        url: '/api/v1/auth/register',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (response: ApiResponse<User>) => unwrapApi(response),
+    }),
     login: builder.mutation<TokenResponse, LoginRequest>({
       query: (body) => ({
         url: '/api/v1/auth/login',
@@ -30,4 +38,4 @@ export const authApi = api.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useGetMeQuery, useLazyGetMeQuery } = authApi;
+export const { useRegisterMutation, useLoginMutation, useGetMeQuery, useLazyGetMeQuery } = authApi;

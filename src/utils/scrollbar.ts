@@ -1,6 +1,6 @@
 import type { SxProps, Theme } from '@mui/material/styles';
 
-export { hideScrollbarSx, pageRootSx, scrollPanelSx, scrollPanelXsx, scrollPanelYsx, panelPaperSx } from './scroll';
+export { hideScrollbarSx, hideScrollbarMdUpSx, pageRootSx, scrollPanelSx, scrollPanelXsx, scrollPanelYsx, panelPaperSx, tableScrollSx, shellMainScrollSx, authPageScrollSx, pageFixedBodySx } from './scroll';
 
 export function inventoryRowSx(
   theme: Theme,

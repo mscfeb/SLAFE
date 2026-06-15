@@ -4,7 +4,7 @@ import HighchartsReact from 'highcharts-react-official';
 import { useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import type { SxProps, Theme } from '@mui/material/styles';
-import { hideScrollbarSx } from '@/utils/scroll';
+import { hideScrollbarMdUpSx } from '@/utils/scroll';
 import { resolveChartScroll } from './chartScroll';
 
 interface ChartCardProps {
@@ -13,9 +13,12 @@ interface ChartCardProps {
   options: Highcharts.Options;
   loading?: boolean;
   height?: number;
+  emptyMessage?: string;
 }
 
-export function ChartCard({ title, subtitle, options, loading, height = 300 }: ChartCardProps) {
+export function ChartCard({ title, subtitle, options, loading, height = 300, emptyMessage }: ChartCardProps) {
+  const scroll = useMemo(() => resolveChartScroll(options), [options]);
+
   const chartOptions = useMemo<Highcharts.Options>(
     () => ({
       ...options,
@@ -23,46 +26,73 @@ export function ChartCard({ title, subtitle, options, loading, height = 300 }: C
         ...options.chart,
         backgroundColor: 'transparent',
         height,
+        ...(scroll.axis === 'x' ? { width: scroll.minSize } : {}),
       },
       credits: { enabled: false },
       title: { text: undefined },
     }),
-    [options, height],
+    [options, height, scroll],
   );
 
-  const scroll = useMemo(() => resolveChartScroll(chartOptions), [chartOptions]);
+  const isEmpty = useMemo(() => {
+    const xAxis = Array.isArray(chartOptions.xAxis) ? chartOptions.xAxis[0] : chartOptions.xAxis;
+    const categories = xAxis?.categories?.length ?? 0;
+    return categories === 0;
+  }, [chartOptions]);
 
   const scrollSx = useMemo((): SxProps<Theme> => {
-    const base = { width: '100%', flex: 1, minHeight: 0 };
+    const chartArea = {
+      width: '100%',
+      minWidth: 0,
+      height,
+      minHeight: height,
+      flexShrink: 0,
+    };
     if (scroll.axis === 'x') {
-      return [hideScrollbarSx, base, { overflowX: 'auto', overflowY: 'hidden' }] as SxProps<Theme>;
+      return [
+        hideScrollbarMdUpSx,
+        chartArea,
+        { overflowX: 'auto', overflowY: 'hidden', WebkitOverflowScrolling: 'touch' },
+      ] as SxProps<Theme>;
     }
     if (scroll.axis === 'y') {
-      return [hideScrollbarSx, base, { overflowY: 'auto', overflowX: 'hidden', maxHeight: height }] as SxProps<Theme>;
+      return [
+        hideScrollbarMdUpSx,
+        { width: '100%', minWidth: 0, maxHeight: height, flex: 1, minHeight: 0 },
+        { overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' },
+      ] as SxProps<Theme>;
     }
-    return base;
+    return chartArea;
   }, [scroll.axis, height]);
 
   const innerSx = useMemo(() => {
-    if (scroll.axis === 'x') return { minWidth: scroll.minSize, width: scroll.minSize };
+    if (scroll.axis === 'x') return { minWidth: scroll.minSize, width: scroll.minSize, height, minHeight: height };
     if (scroll.axis === 'y') return { minHeight: scroll.minSize };
-    return undefined;
-  }, [scroll]);
+    return { width: '100%', height, minHeight: height };
+  }, [scroll, height]);
 
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+    <Card sx={{ width: '100%', minWidth: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <Typography variant="subtitle1" fontWeight={600} sx={{ flexShrink: 0 }}>
           {title}
         </Typography>
         {subtitle && (
-          <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, mb: 0.5 }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ flexShrink: 0, mb: 0.5, display: 'block', wordBreak: 'break-word' }}
+          >
             {subtitle}
           </Typography>
         )}
         {loading ? (
           <Typography sx={{ py: 10, textAlign: 'center' }} color="text.secondary">
             Loading chart...
+          </Typography>
+        ) : isEmpty && emptyMessage ? (
+          <Typography sx={{ py: 10, textAlign: 'center' }} color="text.secondary">
+            {emptyMessage}
           </Typography>
         ) : (
           <Box sx={scrollSx}>

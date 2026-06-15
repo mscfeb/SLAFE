@@ -14,7 +14,18 @@ import {
   useGetStorePerformanceQuery,
   useGetInventoryForecastQuery,
 } from '@/services/analyticsApi';
-import type { AnalyticsDataPoint } from '@/types/api';
+import type { AnalyticsDataPoint, InventoryForecastItem } from '@/types/api';
+
+function formatSkuLabel(item: InventoryForecastItem): string {
+  const abbrev: Record<string, string> = {
+    SINGLE_VISION: 'SV',
+    BIFOCAL: 'BF',
+    PROGRESSIVE: 'PR',
+    READING: 'RD',
+  };
+  const tag = abbrev[item.lens_type] ?? item.lens_type.slice(0, 2);
+  return `${item.power} ${tag}`;
+}
 
 function formatLensLabel(label: string): string {
   return label.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -48,7 +59,7 @@ export function AnalyticsPage() {
   const { data: volume, isLoading: volumeLoading } = useGetOrderVolumeTrendQuery({ weeks: 8 });
   const { data: lensTypes, isLoading: lensLoading } = useGetLensTypeDistributionQuery();
   const { data: stores, isLoading: storesLoading } = useGetStorePerformanceQuery();
-  const { data: forecast, isLoading: forecastLoading } = useGetInventoryForecastQuery({ months: 6 });
+  const { data: forecast, isLoading: forecastLoading, isError: forecastError } = useGetInventoryForecastQuery({ months: 6 });
 
   const topForecast = useMemo(
     () => (forecast?.items ?? []).slice(0, TOP_SKUS),
@@ -91,12 +102,15 @@ export function AnalyticsPage() {
   const inventoryChart = useMemo<Options>(() => {
     const items = topForecast;
     return {
-      chart: { type: 'column' },
+      chart: { type: 'column', spacing: [10, 10] },
       xAxis: {
-        categories: items.map((i) => i.power),
-        labels: { style: { color: chartTheme.text } },
+        categories: items.map(formatSkuLabel),
+        labels: { style: { color: chartTheme.text }, rotation: -35 },
       },
       yAxis: { title: { text: 'Units' }, gridLineColor: chartTheme.grid, min: 0 },
+      plotOptions: {
+        column: { grouping: true, pointPadding: 0.1, borderWidth: 0 },
+      },
       series: [
         { type: 'column', name: 'Current stock', data: items.map((i) => i.current_stock), color: '#22c55e' },
         { type: 'column', name: 'Recommended', data: items.map((i) => i.recommended_stock), color: '#2563eb' },
@@ -176,15 +190,20 @@ export function AnalyticsPage() {
             loading={storesLoading}
           />
         </Grid>
-        <Grid item xs={12} sx={{ minHeight: 400 }}>
+        {/* <Grid item xs={12} sx={{ width: '100%', minHeight: 420 }}>
           <ChartCard
             title="Inventory Levels"
             subtitle={`Current vs recommended stock (6-month order demand) · ${understockCount} understock · ${overstockCount} overstock`}
             options={inventoryChart}
             height={360}
             loading={forecastLoading}
+            emptyMessage={
+              forecastError
+                ? 'Unable to load inventory forecast. Check API connection and try again.'
+                : 'No inventory SKUs found. Seed inventory data to see stock levels.'
+            }
           />
-        </Grid>
+        </Grid> */}
       </Grid>
     </PageShell>
   );

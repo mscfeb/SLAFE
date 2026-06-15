@@ -28,7 +28,7 @@ import { PageSkeleton } from '@/components/common/PageSkeleton';
 import { EmptyState } from '@/components/common/EmptyState';
 import { PageShell } from '@/components/layout/PageShell';
 import { formatDate, severityColor } from '@/utils/formatters';
-import { hideScrollbarSx, panelPaperSx } from '@/utils/scroll';
+import { panelPaperSx, tableScrollSx } from '@/utils/scroll';
 import { useAuth } from '@/hooks/useAuth';
 
 export function AlertsPage() {
@@ -78,7 +78,7 @@ export function AlertsPage() {
       }
     >
       <Paper sx={panelPaperSx}>
-        <TableContainer sx={{ flex: 1, minHeight: 0, overflow: 'auto', ...hideScrollbarSx }}>
+        <TableContainer sx={tableScrollSx}>
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
